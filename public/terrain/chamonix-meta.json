@@ -1,0 +1,74 @@
+{
+  "name": "Mont Blanc / Vall\u00e9e Blanche, Chamonix",
+  "source": "AWS Open Elevation Tiles (Terrarium DEM / EU-DEM)",
+  "width": 512,
+  "height": 512,
+  "worldSizeX": 8521.47,
+  "worldSizeZ": 8500.05,
+  "minElev": 1001.61,
+  "maxElev": 4413.99,
+  "centerLat": 45.878,
+  "centerLon": 6.887,
+  "bounds": {
+    "north": 45.916288,
+    "south": 45.839803,
+    "west": 6.833496,
+    "east": 6.943359
+  },
+  "spawn": {
+    "x": 108.39,
+    "z": -191.29,
+    "elevation": 3671.2,
+    "yaw": 1.0394
+  },
+  "landmarks": [
+    {
+      "name": "Aiguille du Midi",
+      "x": -72.0,
+      "z": -60.2,
+      "elevation": 3686.7,
+      "lat": 45.8786,
+      "lon": 6.8875
+    },
+    {
+      "name": "Vall\u00e9e Blanche (Upper)",
+      "x": 820.0,
+      "z": 951.1,
+      "elevation": 3412.1,
+      "lat": 45.8695,
+      "lon": 6.899
+    },
+    {
+      "name": "Mont Blanc du Tacul",
+      "x": -48.7,
+      "z": 2395.4,
+      "elevation": 4143.4,
+      "lat": 45.8565,
+      "lon": 6.8878
+    },
+    {
+      "name": "Pointe Helbronner",
+      "x": 3418.4,
+      "z": 3639.5,
+      "elevation": 3375.1,
+      "lat": 45.8453,
+      "lon": 6.9325
+    },
+    {
+      "name": "Glacier du G\u00e9ant",
+      "x": 2604.0,
+      "z": 1117.7,
+      "elevation": 2856.0,
+      "lat": 45.868,
+      "lon": 6.922
+    },
+    {
+      "name": "Mer de Glace",
+      "x": 3612.3,
+      "z": -2772.4,
+      "elevation": 2189.5,
+      "lat": 45.903,
+      "lon": 6.935
+    }
+  ]
+}

@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chamonix — Vallée Blanche Freeride Ski Simulator</title>
+    <meta
+      name="description"
+      content="Playable first-person WebGL2 freeride ski simulator modeled on real Mont Blanc / Chamonix Vallée Blanche terrain with alpine snow shaders, carving physics, and Web Audio synthesis."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <main class="viewport">
+      <canvas id="gl-canvas" aria-label="Chamonix Vallée Blanche 3D WebGL2 Ski Simulator"></canvas>
+
+      <!-- Top-left Alpine Compass & Vertical Drop -->
+      <header class="hud-top-left" id="hud-top-left">
+        <div class="hud-pill compass-pill">
+          <span class="pill-label">HDG</span>
+          <span class="pill-value mono" id="hud-heading">060° NE</span>
+          <span class="pill-divider"></span>
+          <span class="pill-label">DROP</span>
+          <span class="pill-value mono" id="hud-drop">0 m</span>
+        </div>
+      </header>
+
+      <!-- Top-right Utility Controls (Audio Mute + Summit Reset) -->
+      <nav class="hud-top-right" aria-label="Simulator controls">
+        <button
+          type="button"
+          id="btn-mute"
+          class="hud-btn"
+          title="Toggle Sound (M)"
+          aria-pressed="false"
+        >
+          <svg
+            id="icon-sound-on"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <svg
+            id="icon-sound-off"
+            class="hidden"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+          <span id="mute-label">Sound</span>
+        </button>
+
+        <button
+          type="button"
+          id="btn-reset"
+          class="hud-btn"
+          title="Reset to Aiguille du Midi Summit (R)"
+        >
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+          </svg>
+          <span>Summit</span>
+          <kbd>R</kbd>
+        </button>
+      </nav>
+
+      <!-- Dynamic Flight / Boundary Status Callout -->
+      <div class="hud-callout hidden" id="hud-callout" role="status" aria-live="polite"></div>
+
+      <!-- Bottom-left Primary Telemetry HUD (Speed, Elevation, Slope Angle) -->
+      <section class="hud-telemetry" id="hud-telemetry" aria-label="Ski telemetry">
+        <div class="telemetry-speed">
+          <div class="speed-number mono" id="hud-speed">0</div>
+          <div class="speed-meta">
+            <span class="unit">KM/H</span>
+            <div class="speed-bar-track">
+              <div class="speed-bar-fill" id="hud-speed-bar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="telemetry-grid">
+          <div class="metric">
+            <span class="metric-label">ELEVATION</span>
+            <span class="metric-value mono" id="hud-elevation">3,671 m</span>
+          </div>
+          <div class="metric-sep"></div>
+          <div class="metric">
+            <span class="metric-label">SLOPE</span>
+            <span class="metric-value mono slope-row">
+              <span class="slope-icon" id="hud-slope-line"></span>
+              <span id="hud-slope">27°</span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bottom-right Compact Controls Strip -->
+      <aside class="hud-keys" id="hud-keys" aria-label="Keyboard controls">
+        <span><kbd>A</kbd><kbd>D</kbd> Carve</span>
+        <span><kbd>S</kbd> Stop</span>
+        <span><kbd>W</kbd> Tuck</span>
+        <span><kbd>Space</kbd> Jump</span>
+        <span><kbd>R</kbd> Summit</span>
+      </aside>
+
+      <!-- Launch Overlay (Transparent over live Mont Blanc 3D terrain) -->
+      <section class="launch-overlay" id="launch-overlay" aria-label="Start ski run">
+        <div class="launch-card">
+          <p class="eyebrow mono">MONT BLANC MASSIF · 45.878° N, 6.887° E</p>
+          <h1>Chamonix Vallée Blanche</h1>
+          <p class="subtitle">
+            First-person freeride descent over real Chamonix elevation data from the Aiguille du Midi shoulder.
+          </p>
+
+          <div class="controls-grid">
+            <div class="control-item">
+              <div class="keys"><kbd>A</kbd><kbd>D</kbd> / <kbd>←</kbd><kbd>→</kbd></div>
+              <div class="desc">Carve turns &amp; edge skis</div>
+            </div>
+            <div class="control-item">
+              <div class="keys"><kbd>S</kbd> / <kbd>↓</kbd></div>
+              <div class="desc">Hockey stop &amp; scrub speed</div>
+            </div>
+            <div class="control-item">
+              <div class="keys"><kbd>Space</kbd></div>
+              <div class="desc">Jump off alpine ridges</div>
+            </div>
+            <div class="control-item">
+              <div class="keys"><kbd>W</kbd> / <kbd>↑</kbd> &nbsp;·&nbsp; <kbd>R</kbd></div>
+              <div class="desc">Aero tuck &nbsp;·&nbsp; Reset summit</div>
+            </div>
+          </div>
+
+          <button type="button" id="btn-drop-in" class="btn-primary">
+            <span id="btn-drop-in-label">Loading Chamonix Terrain…</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- WebGL2 fallback message -->
+      <div class="error-overlay hidden" id="error-overlay" role="alert">
+        <div class="launch-card">
+          <h2>WebGL2 Unavailable</h2>
+          <p id="error-message">
+            This simulator requires a browser with WebGL2 enabled.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
